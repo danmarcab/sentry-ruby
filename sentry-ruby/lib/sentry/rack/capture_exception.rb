@@ -17,8 +17,10 @@ module Sentry
           # and for request information, we don't need those breadcrumbs
           scope.clear_breadcrumbs
           env['sentry.client'] = Sentry.get_current_client
+          span = scope.span
 
           scope.set_transaction_name(env["PATH_INFO"]) if env["PATH_INFO"]
+          scope.span.set_op(scope.transaction_name) if span
           scope.set_rack_env(env)
 
           begin
@@ -26,12 +28,12 @@ module Sentry
           rescue Sentry::Error
             raise # Don't capture Sentry errors
           rescue Exception => e
-            Sentry.capture_exception(e)
+            capture_exception(e, span)
             raise
           end
 
           exception = collect_exception(env)
-          Sentry.capture_exception(exception) if exception
+          capture_exception(exception, span) if exception
 
           response
         end
@@ -39,6 +41,15 @@ module Sentry
 
       def collect_exception(env)
         env['rack.exception'] || env['sinatra.error']
+      end
+
+      def capture_exception(exception, span)
+        if span
+          span.set_http_status(500)
+          span.finish
+        end
+
+        Sentry.capture_exception(exception)
       end
     end
   end

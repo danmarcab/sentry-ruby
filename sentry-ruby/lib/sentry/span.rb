@@ -61,7 +61,7 @@ module Sentry
       set_data("status_code", status_code)
 
       status =
-        if status_code > 200 && status_code < 299
+        if status_code >= 200 && status_code < 299
           "ok"
         else
           case status_code
