@@ -137,6 +137,15 @@ RSpec.describe Sentry::Hub do
     end
   end
 
+  describe "#start_span" do
+    it "initializes a new span object" do
+      span = subject.start_span(op: "foo")
+
+      expect(span).to be_a(Sentry::Span)
+      expect(span.op).to eq("foo")
+    end
+  end
+
   describe "#with_scope" do
     it "builds a temporary scope" do
       inner_event = nil

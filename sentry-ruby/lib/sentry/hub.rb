@@ -67,6 +67,10 @@ module Sentry
       @stack.pop
     end
 
+    def start_span(**options)
+      Span.new(**options)
+    end
+
     def capture_exception(exception, **options, &block)
       return unless current_client
 

@@ -13,7 +13,7 @@ module Sentry
       release environment server_name modules
       message user tags contexts extra
       fingerprint breadcrumbs backtrace transaction
-      platform sdk
+      platform sdk spans
     )
 
     attr_accessor(*ATTRIBUTES)
@@ -37,6 +37,7 @@ module Sentry
       @tags          = {}
 
       @fingerprint = []
+      @spans = []
 
       @server_name = configuration.server_name
       @environment = configuration.current_environment
@@ -96,6 +97,7 @@ module Sentry
       data[:stacktrace] = @stacktrace.to_hash if @stacktrace
       data[:request] = @request.to_hash if @request
       data[:exception] = @exception.to_hash if @exception
+      data[:spans] = @spans.map(&:to_hash)
 
       data
     end

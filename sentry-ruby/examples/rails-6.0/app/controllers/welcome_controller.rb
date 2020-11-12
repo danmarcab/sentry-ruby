@@ -19,6 +19,8 @@ class WelcomeController < ApplicationController
     Sentry.configure_scope do |scope|
       counter = (scope.tags[:counter] || 0) + 1
       scope.set_tag(:counter, counter)
+      span = Sentry.start_span(op: scope.transaction_name)
+      scope.set_span(span)
     end
   end
 end
