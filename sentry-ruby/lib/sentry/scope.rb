@@ -70,6 +70,7 @@ module Sentry
       self.user = scope.user
       self.transaction_names = scope.transaction_names
       self.fingerprint = scope.fingerprint
+      self.span = scope.span
     end
 
     def update_from_options(

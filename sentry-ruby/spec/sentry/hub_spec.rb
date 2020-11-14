@@ -144,6 +144,23 @@ RSpec.describe Sentry::Hub do
       expect(span).to be_a(Sentry::Span)
       expect(span.op).to eq("foo")
     end
+
+    context "already has a span in scope" do
+      let(:span) do
+        subject.start_span(op: "foo")
+      end
+
+      before do
+        subject.current_scope.set_span(span)
+      end
+
+      it "starts a child span of the current span" do
+        child_span = subject.start_span(op: "bar")
+
+        expect(child_span.op).to eq("bar")
+        expect(child_span.parent_span_id).to eq(span.span_id)
+      end
+    end
   end
 
   describe "#with_scope" do

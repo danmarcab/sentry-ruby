@@ -40,6 +40,31 @@ RSpec.describe Sentry::Span do
     end
   end
 
+  describe "#start_child" do
+    it "initializes a new child Span" do
+      # create subject span and wait for a sec for making time difference
+      subject
+      sleep 1
+
+      new_span = subject.start_child(op: "sql.query", description: "SELECT * FROM orders WHERE orders.user_id = 1", status: "ok")
+
+      expect(new_span.op).to eq("sql.query")
+      expect(new_span.description).to eq("SELECT * FROM orders WHERE orders.user_id = 1")
+      expect(new_span.status).to eq("ok")
+      expect(new_span.trace_id).to eq(subject.trace_id)
+      expect(new_span.span_id).not_to eq(subject.span_id)
+      expect(new_span.parent_span_id).to eq(subject.span_id)
+      expect(new_span.start_timestamp).not_to eq(subject.start_timestamp)
+    end
+
+    it "records the child span" do
+      new_span = subject.start_child(op: "sql.query", description: "SELECT * FROM orders WHERE orders.user_id = 1", status: "ok")
+
+      expect(subject.span_recorder.spans).to include(new_span)
+      expect(new_span.span_recorder).to eq(subject.span_recorder)
+    end
+  end
+
   describe "#set_status" do
     it "sets status" do
       subject.set_status("ok")

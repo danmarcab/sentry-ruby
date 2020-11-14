@@ -68,7 +68,11 @@ module Sentry
     end
 
     def start_span(**options)
-      Span.new(**options)
+      if span = current_scope.span
+        span.start_child(**options)
+      else
+        Span.new(**options)
+      end
     end
 
     def capture_exception(exception, **options, &block)
