@@ -98,6 +98,28 @@ RSpec.describe Sentry::Event do
     end
   end
 
+  describe "#to_hash" do
+    context "with spans" do
+      subject do
+        Sentry::Event.new(configuration: configuration)
+      end
+
+      before do
+        parent_span = Sentry::Span.new(op: "parent")
+        _child_span = parent_span.start_child(op: "child")
+        subject.spans << parent_span
+      end
+
+      it "flattens and serializes the spans" do
+        hash = subject.to_hash
+
+        expect(hash[:spans].count).to eq(2)
+        expect(hash[:spans][0][:op]).to eq("parent")
+        expect(hash[:spans][1][:op]).to eq("child")
+      end
+    end
+  end
+
   describe '#to_json_compatible' do
     subject do
       Sentry::Event.new(configuration: configuration).tap do |event|

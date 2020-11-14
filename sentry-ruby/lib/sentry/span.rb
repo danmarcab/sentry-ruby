@@ -27,13 +27,25 @@ module Sentry
       @timestamp = Time.now.utc.iso8601
     end
 
+    def serialize_with_child_spans
+      result = [to_hash]
+
+      unless @span_recorder.spans.empty?
+        result.concat(@span_recorder.spans.map(&:to_hash))
+      end
+
+      result
+    end
+
     def to_hash
       {
         trace_id: @trace_id,
         span_id: @span_id,
         parent_span_id: @parent_span_id,
         start_timestamp: @start_timestamp,
-        timestamp: @timestamp,
+        # every span needs to have a timestamp before sending
+        # but we shouldn't force the current span to be finished either
+        timestamp: @timestamp || Time.now.utc.iso8601,
         description: @description,
         op: @op,
         status: @status,

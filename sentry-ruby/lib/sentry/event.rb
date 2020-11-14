@@ -97,9 +97,19 @@ module Sentry
       data[:stacktrace] = @stacktrace.to_hash if @stacktrace
       data[:request] = @request.to_hash if @request
       data[:exception] = @exception.to_hash if @exception
-      data[:spans] = @spans.map(&:to_hash)
+      data[:spans] = serialize_spans(@spans)
 
       data
+    end
+
+    def serialize_spans(spans)
+      result = []
+
+      spans.each do |span|
+        result.concat(span.serialize_with_child_spans)
+      end
+
+      result
     end
 
     def to_json_compatible
