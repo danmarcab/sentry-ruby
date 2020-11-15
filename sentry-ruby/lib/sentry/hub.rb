@@ -67,6 +67,10 @@ module Sentry
       @stack.pop
     end
 
+    def get_transaction
+      current_scope.span
+    end
+
     def start_span(**options)
       if span = current_scope.span
         span.start_child(**options)

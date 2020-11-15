@@ -163,6 +163,20 @@ RSpec.describe Sentry::Hub do
     end
   end
 
+  describe "#get_transaction" do
+    let(:span) do
+      subject.start_span(op: "foo")
+    end
+
+    before do
+      subject.current_scope.set_span(span)
+    end
+
+    it "gets the transaction/span stored in the current scope" do
+      expect(subject.get_transaction).to eq(span)
+    end
+  end
+
   describe "#with_scope" do
     it "builds a temporary scope" do
       inner_event = nil
