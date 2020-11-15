@@ -3,13 +3,14 @@ require "securerandom"
 
 module Sentry
   class Span
-    attr_reader :trace_id, :span_id, :parent_span_id, :start_timestamp, :timestamp, :description, :op, :status, :tags, :data
+    attr_reader :trace_id, :span_id, :parent_span_id, :sampled, :start_timestamp, :timestamp, :description, :op, :status, :tags, :data
     attr_accessor :span_recorder
 
-    def initialize(description: nil, op: nil, status: nil, trace_id: nil, parent_span_id: nil, start_timestamp: nil, timestamp: nil)
+    def initialize(description: nil, op: nil, status: nil, trace_id: nil, parent_span_id: nil, sampled: nil, start_timestamp: nil, timestamp: nil)
       @trace_id = trace_id || SecureRandom.uuid.delete("-")
       @span_id = SecureRandom.hex(8)
       @parent_span_id = parent_span_id
+      @sampled = sampled
       @start_timestamp = start_timestamp || Time.now.utc.iso8601
       @timestamp = timestamp
       @description = description
@@ -65,7 +66,7 @@ module Sentry
     end
 
     def start_child(**options)
-      options = options.dup.merge(trace_id: @trace_id, parent_span_id: @span_id)
+      options = options.dup.merge(trace_id: @trace_id, parent_span_id: @span_id, sampled: @sampled)
       child_span = self.class.new(options)
       child_span.span_recorder = @span_recorder
       @span_recorder.add(child_span)

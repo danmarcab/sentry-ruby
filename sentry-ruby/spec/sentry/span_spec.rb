@@ -5,7 +5,8 @@ RSpec.describe Sentry::Span do
     described_class.new(
       op: "sql.query",
       description: "SELECT * FROM users;",
-      status: "ok"
+      status: "ok",
+      sampled: true
     )
   end
 
@@ -55,6 +56,7 @@ RSpec.describe Sentry::Span do
       expect(new_span.span_id).not_to eq(subject.span_id)
       expect(new_span.parent_span_id).to eq(subject.span_id)
       expect(new_span.start_timestamp).not_to eq(subject.start_timestamp)
+      expect(new_span.sampled).to eq(true)
     end
 
     it "records the child span" do
