@@ -28,20 +28,20 @@ RSpec.describe Sentry::Rack::CaptureException do
   end
 
   context "with tracing middleware" do
-    it "finishes the span before sending the event" do
-      app = ->(_e) { raise exception }
-      inner_stack = described_class.new(app)
-      stack = Sentry::Rack::Tracing.new(inner_stack)
+    # it "finishes the span before sending the event" do
+    #   app = ->(_e) { raise exception }
+    #   inner_stack = described_class.new(app)
+    #   stack = Sentry::Rack::Tracing.new(inner_stack)
 
-      expect { stack.call(env) }.to raise_error(ZeroDivisionError)
+    #   expect { stack.call(env) }.to raise_error(ZeroDivisionError)
 
-      event = transport.events.last
-      expect(event.to_hash.dig(:request, :url)).to eq("http://example.org/test")
+    #   event = transport.events.last
+    #   expect(event.to_hash.dig(:request, :url)).to eq("http://example.org/test")
 
-      span = event.spans.first
-      expect(span.timestamp).not_to be_nil
-      expect(span.status).to eq("internal_error")
-    end
+    #   span = event.spans.first
+    #   expect(span.timestamp).not_to be_nil
+    #   expect(span.status).to eq("internal_error")
+    # end
   end
 
   it 'captures the exception from rack.exception' do

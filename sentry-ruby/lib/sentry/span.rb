@@ -26,6 +26,7 @@ module Sentry
       @data = {}
       @tags = {}
       @span_recorder = SpanRecorder.new(1000)
+      @span_recorder.add(self)
     end
 
     def finish
@@ -58,9 +59,7 @@ module Sentry
         span_id: @span_id,
         parent_span_id: @parent_span_id,
         start_timestamp: @start_timestamp,
-        # every span needs to have a timestamp before sending
-        # but we shouldn't force the current span to be finished either
-        timestamp: @timestamp || Time.now.utc.iso8601,
+        timestamp: @timestamp,
         description: @description,
         op: @op,
         status: @status,

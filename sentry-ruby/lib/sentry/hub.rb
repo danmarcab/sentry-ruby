@@ -79,6 +79,11 @@ module Sentry
       end
     end
 
+    def start_transaction(transaction: nil, **options)
+      transaction ||= Transaction.new(**options, sampled: true)
+      # TODO: Add sampling logic
+    end
+
     def capture_exception(exception, **options, &block)
       return unless current_client
 

@@ -9,11 +9,11 @@ require 'sentry/utils/real_ip'
 module Sentry
   class Event
     ATTRIBUTES = %i(
-      event_id level timestamp
+      event_id level timestamp start_timestamp
       release environment server_name modules
       message user tags contexts extra
       fingerprint breadcrumbs backtrace transaction
-      platform sdk spans
+      platform sdk spans type
     )
 
     attr_accessor(*ATTRIBUTES)
@@ -22,6 +22,7 @@ module Sentry
     alias event_id id
 
     def initialize(configuration:, message: nil)
+      @type = "event"
       # this needs to go first because some setters rely on configuration
       @configuration = configuration
 
@@ -52,8 +53,8 @@ module Sentry
     class << self
       def get_log_message(event_hash)
         message = event_hash[:message] || event_hash['message']
-        message = get_message_from_exception(event_hash) if message.empty?
-        message = '<no message value>' if message.empty?
+        message = get_message_from_exception(event_hash) if message.nil? || message.empty?
+        message = '<no message value>' if message.nil? || message.empty?
         message
       end
 
@@ -70,6 +71,10 @@ module Sentry
 
     def timestamp=(time)
       @timestamp = time.is_a?(Time) ? time.strftime('%Y-%m-%dT%H:%M:%S') : time
+    end
+
+    def start_timestamp=(time)
+      @start_timestamp = time.is_a?(Time) ? time.strftime('%Y-%m-%dT%H:%M:%S') : time
     end
 
     def level=(new_level) # needed to meet the Sentry spec
@@ -97,7 +102,7 @@ module Sentry
       data[:stacktrace] = @stacktrace.to_hash if @stacktrace
       data[:request] = @request.to_hash if @request
       data[:exception] = @exception.to_hash if @exception
-      data[:spans] = serialize_spans(@spans)
+      data[:spans] = @spans.map(&:to_hash)
 
       data
     end
