@@ -3,6 +3,13 @@ require "securerandom"
 
 module Sentry
   class Span
+    TRACEPARENT_REGEXP = Regexp.new(
+      "^[ \t]*" +  # whitespace
+      "([0-9a-f]{32})?" +  # trace_id
+      "-?([0-9a-f]{16})?" +  # span_id
+      "-?([01])?" +  # sampled
+      "[ \t]*$"  # whitespace
+    )
     attr_reader :trace_id, :span_id, :parent_span_id, :sampled, :start_timestamp, :timestamp, :description, :op, :status, :tags, :data
     attr_accessor :span_recorder
 
@@ -36,6 +43,13 @@ module Sentry
       end
 
       result
+    end
+
+    def to_traceparent
+      sampled_flag = ""
+      sampled_flag = @sampled ? 1 : 0 unless @sampled.nil?
+
+      "#{@trace_id}-#{@span_id}-#{sampled_flag}"
     end
 
     def to_hash

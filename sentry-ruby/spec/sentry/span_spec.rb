@@ -41,6 +41,26 @@ RSpec.describe Sentry::Span do
     end
   end
 
+  describe "#to_traceparent" do
+    it "returns correctly-formatted value" do
+      traceparent = subject.to_traceparent
+
+      expect(traceparent).to eq("#{subject.trace_id}-#{subject.span_id}-1")
+      expect(traceparent).to match(Sentry::Span::TRACEPARENT_REGEXP)
+    end
+
+    context "without sampled value" do
+      subject { described_class.new }
+
+      it "doesn't contain the sampled flag" do
+        traceparent = subject.to_traceparent
+
+        expect(traceparent).to eq("#{subject.trace_id}-#{subject.span_id}-")
+        expect(traceparent).to match(Sentry::Span::TRACEPARENT_REGEXP)
+      end
+    end
+  end
+
   describe "#start_child" do
     it "initializes a new child Span" do
       # create subject span and wait for a sec for making time difference
